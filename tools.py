@@ -119,11 +119,13 @@ def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, lef
 	for algo in algos:
 		plt.plot(left_x, left_data[algo], marker=markers[algos.index(algo)])
 	plt.legend(algos_names, bbox_to_anchor=(1.5, 0.8))
-	#plt.subplots_adjust(left=-0.15)
+
 	if left_xlog:
 		plt.xscale('log')
+		font_size_pie = 14
 	else:
 		plt.xticks(left_x, left_x)
+		font_size_pie = 6
 	plt.yscale('log')
 	plt.xlabel(left_xlabel)
 	plt.ylabel('Time (seconds)')
@@ -136,12 +138,10 @@ def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, lef
 	components = ["time U", "time AS"] + ["time R" + str(i) for i in range(1, K+1)]
 	time_per_component = [right_aggregates_all["ucb_ds"][component] for component in components]
 	components = list(map (lambda x: x[5:], components)) # remove "time " from the left of each key
-	#if not left_xlog:
-	#	plt.rcParams.update({'font.size':10})
 
 	colors = ["#FF0033","#2D5DF5","#B75F31","#22792E","#413DE7","#19DBAD","#7653C2","#F3AE32","#1B9978","#5A82F1","#E9953F","#EBD86D","#3BECA4","#1E0968","#2952B0","#2E01A6","#2613DF","#5AC0AB","#1FD9EF","#441A71","#AA64AC","#960DC9","#BF6434","#21C13D","#1A8990","#B75EC4","#CFDE9F","#04350E","#B3CF0A","#E26F5D","#2EFD6E","#BEA469","#3F4696","#F46962","#162FE9","#E26CD6","#6433F1"]
 
-	plt.pie(time_per_component, labels=components, colors=colors)
+	plt.pie(time_per_component, labels=components, colors=colors, textprops={'fontsize': font_size_pie})
 
 	plt.savefig(OUTPUT_DIR + "plot_scenario" + scenario + ".pdf")
 	plt.clf()
