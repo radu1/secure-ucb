@@ -1,4 +1,4 @@
-This is the code used for the experimental study reported in the paper TODO.
+This is the code used for the experimental study reported in the paper *Secure Outsourcing of Multi-Armed Bandits in an Honest-but-Curious Cloud*.
 
 We have done our implementation in Python 3 on Ubuntu.
 We provide a detailed description of the experimental setup and results in Section 4 of our paper.
