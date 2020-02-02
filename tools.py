@@ -110,40 +110,45 @@ def check_results(R_list, algos):
 
 # Plot one line for each algorithm + pie chart only for some point
 def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, left_x, left_data, right_aggregates_all, right_message, OUTPUT_DIR):
-	plt.figure(figsize=(12, 3))
-	plt.rcParams.update({'font.size':14})
+    plt.figure(figsize=(12, 3))
+    plt.rcParams.update({'font.size':14})
 
-	# left : plot one line for each algorithm
-	ax = plt.subplot(121)
-	markers = ('x', 'o', '*', '.')
-	for algo in algos:
-		plt.plot(left_x, left_data[algo], marker=markers[algos.index(algo)])
-	plt.legend(algos_names, bbox_to_anchor=(1.5, 0.8))
+    # left : plot one line for each algorithm
+    ax = plt.subplot(121)
+    markers = ('s', 'v', 'p', '^')
+    fill_style = ('none', 'full', 'none', 'full')
+    for algo in algos:
+        plt.plot(left_x, left_data[algo], marker=markers[algos.index(algo)], fillstyle=fill_style[algos.index(algo)], markersize=10, linewidth=1.5, markeredgewidth=1.5)
+    plt.legend(algos_names, bbox_to_anchor=(1.5, 0.8))
 
-	if left_xlog:
-		plt.xscale('log')
-		font_size_pie = 14
-	else:
-		plt.xticks(left_x, left_x)
-		font_size_pie = 6
-	plt.yscale('log')
-	plt.xlabel(left_xlabel)
-	plt.ylabel('Time (seconds)')
-	plt.subplots_adjust(top=0.9, bottom=0.2)
+    font_size_pie = 14
 
-	# right : pie chart only for some point
-	plt.subplot(144)		
-	plt.title("Zoom on UCB-DS for " + right_message)
-	K = len(right_aggregates_all["ucb_ds"].keys()) - 3
-	components = ["time U", "time AS"] + ["time R" + str(i) for i in range(1, K+1)]
-	time_per_component = [right_aggregates_all["ucb_ds"][component] for component in components]
-	components = list(map (lambda x: x[5:], components)) # remove "time " from the left of each key
+    K = len(right_aggregates_all["ucb_ds"].keys()) - 3
+    components = ["time AS"] + ["time R" + str(i) for i in range(1, K+1)] + ["time U"]
+    time_per_component = [right_aggregates_all["ucb_ds"][component] for component in components]
 
-	colors = ["#FF0033","#2D5DF5","#B75F31","#22792E","#413DE7","#19DBAD","#7653C2","#F3AE32","#1B9978","#5A82F1","#E9953F","#EBD86D","#3BECA4","#1E0968","#2952B0","#2E01A6","#2613DF","#5AC0AB","#1FD9EF","#441A71","#AA64AC","#960DC9","#BF6434","#21C13D","#1A8990","#B75EC4","#CFDE9F","#04350E","#B3CF0A","#E26F5D","#2EFD6E","#BEA469","#3F4696","#F46962","#162FE9","#E26CD6","#6433F1"]
+    if left_xlog:
+        plt.xscale('log')
+        components = list(map (lambda x: x[5:], components)) # remove "time " from the left of each key
+    else:
+        plt.xticks(left_x, left_x)
+        components = list(map (lambda x: '', components))
+    plt.yscale('log')
+    plt.xlabel(left_xlabel)
+    plt.ylabel('Time (seconds)')
+    plt.subplots_adjust(top=0.9, bottom=0.2)
 
-	plt.pie(time_per_component, labels=components, colors=colors, textprops={'fontsize': font_size_pie})
+    # right : pie chart only for some point
+    plt.subplot(144)    
+    plt.title("Zoom on UCB-DS for " + right_message)
 
-	plt.savefig(OUTPUT_DIR + "plot_scenario" + scenario + ".pdf")
-	plt.clf()
+    cm = plt.get_cmap('gist_rainbow')
+    NUM_COLORS = len(components) + 1
+    colors = []
+    for i in range(NUM_COLORS):
+      colors.append(cm(1.*i/NUM_COLORS))
+    plt.pie(time_per_component, labels=components, colors=colors, textprops={'fontsize': font_size_pie})
 
+    plt.savefig(OUTPUT_DIR + "plot_scenario" + scenario + ".pdf")
+    plt.clf()
 
