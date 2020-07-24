@@ -8,5 +8,5 @@ The script `scalability-experiments.py` allows to reproduce the plots "Scalabili
 
 The script `real-world-experiment.py` allows to reproduce the plot on "Real-world data scenarios".
 
-Each of the aforementioned two scripts assumes that each scenario (N, K, mu) from each of the figures has been already run 100 times and the running times are already reported in `output_experiment1` for Figure 6, `experiment2` for Figure 7, and `real-world-data-output` for Figure 8.
+Each of the aforementioned two scripts assumes that each scenario (N, K, mu) from each of the figures has been already run 100 times and the running times are already reported in `output_experiment1` for "Scalability with respect to N", `experiment2` for "Scalability with respect to K", and `real-world-data-output` for "Real-world data scenarios".
 If you want to re-run the 100 runs for each scenario (N, K, mu), you simply need to uncomment the lines that start with `#os.system("python3 " + algo...` in the scripts.
