@@ -19,9 +19,9 @@ class DataOwner():
 		return self.mu[i]
 
 
-########## class User
-class User():
-	# Initialize User, who has a budget N
+########## class DataClient
+class DataClient():
+	# Initialize DataClient, who has a budget N
 	def __init__(self, N):
 		self.N = N
 
@@ -127,9 +127,9 @@ def UCB_D(N, K, mu):
 
 	# step 1
 	AS = ArmSelector(K)
-	U = User(N)
-	data_U_AS = U.send_budget(AS)
-	AS.receive_budget(data_U_AS)
+	DC = DataClient(N)
+	data_DC_AS = DC.send_budget(AS)
+	AS.receive_budget(data_DC_AS)
 
 	# make nodes know each other
 	AS.R_nodes = R_nodes
@@ -143,11 +143,11 @@ def UCB_D(N, K, mu):
 		
 	# steps 5, 6
 	R = AS.compute_cumulative_reward()
-	U.receive_R(R)
+	DC.receive_R(R)
 	
 	# construct and return result
 	result = dict()
-	result["R"] = U.R
+	result["R"] = DC.R
 	result["time"] = time.time() - t_start
 	return result
 

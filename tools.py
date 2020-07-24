@@ -124,7 +124,7 @@ def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, lef
     font_size_pie = 14
 
     K = len(right_aggregates_all["ucb_ds"].keys()) - 3
-    components = ["time AS"] + ["time R" + str(i) for i in range(1, K+1)] + ["time U"]
+    components = ["time AS"] + ["time R" + str(i) for i in range(1, K+1)] + ["time DC"]
     time_per_component = [right_aggregates_all["ucb_ds"][component] for component in components]
 
     if left_xlog:

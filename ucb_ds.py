@@ -33,9 +33,9 @@ class DataOwner():
 		return (ciphertext_mu_i, iv)
 
 
-########## class User
-class User():
-	# Initialize User, who has a budget N
+########## class DataClient
+class DataClient():
+	# Initialize DataClient, who has a budget N
 	def __init__(self, N):
 		self.time = 0
 		t = time.time()
@@ -57,14 +57,14 @@ class User():
 ########## class R_node
 class R_node():
 	# Initialize arm node i, who has variables s_i, n_i, and t needed to compute B_i later on
-	def __init__(self, K, i, pk_U, key):
+	def __init__(self, K, i, pk_DC, key):
 		self.time = 0
 		t = time.time()
 		self.i = i
 		self.s_i = 0
 		self.n_i = 0
 		self.t = K-1
-		self.pk_U = pk_U # the pk of User is needed to send ecrypted sum of rewards at the end
+		self.pk_DC = pk_DC # the pk of DataClient is needed to send ecrypted sum of rewards at the end
 		self.key = key # shared key with AS, DO
 		self.time += time.time() - t
 
@@ -126,7 +126,7 @@ class R_node():
 	# Step 5: Arm node i sends the sum of rewards that it produced
 	def send_partial_reward(self):
 		t = time.time()
-		ciphertext_s_i = self.pk_U.encrypt(self.s_i)
+		ciphertext_s_i = self.pk_DC.encrypt(self.s_i)
 		self.time += time.time() - t
 		return ciphertext_s_i
 
@@ -198,20 +198,20 @@ def UCB_DS(N, K, mu):
 	# generate AES CBC key; the key is shared between DO, AS, R_i
 	key = get_random_bytes(32)
 
-	U = User(N) # we create User here because her pk is needed to initialize each arm node
+	DC = DataClient(N) # we create DataClient here because her pk is needed to initialize each arm node
 
 	# step 0
 	DO = DataOwner(K, mu, key)
 	R_nodes = dict()
 	for i in range (1, K+1):
-		R_nodes[i] = R_node(K, i, U.pk, key)
+		R_nodes[i] = R_node(K, i, DC.pk, key)
 		data_DO_Ri = DO.outsource_arm(i)
 		R_nodes[i].receive_outsourced_mu(data_DO_Ri)
 
 	# step 1
 	AS = ArmSelector(K, key)
-	data_U_AS = U.send_budget(AS)
-	AS.receive_budget(data_U_AS)
+	data_DC_AS = DC.send_budget(AS)
+	AS.receive_budget(data_DC_AS)
 
 	# make nodes know each other
 	AS.R_nodes = R_nodes
@@ -225,19 +225,19 @@ def UCB_DS(N, K, mu):
 		
 	# steps 5, 6
 	R = AS.compute_cumulative_reward()
-	U.receive_R(R)
+	DC.receive_R(R)
 	
 	# construct and return result
 	result = dict()
-	result["R"] = U.R
+	result["R"] = DC.R
 	result["time"] = time.time() - t_start
 
 	result["time DO"] = DO.time
-	result["time U"] = U.time
+	result["time DC"] = DC.time
 	result["time AS"] = AS.time
 
 	check_time = 0
-	check_time += DO.time + U.time + AS.time
+	check_time += DO.time + DC.time + AS.time
 
 	for i in range(1, K+1):
 		result["time R" + str(i)] = R_nodes[i].time

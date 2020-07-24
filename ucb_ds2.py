@@ -12,20 +12,20 @@ from Crypto.Util.Padding import pad, unpad
 sys.path.append(os.path.relpath("."))
 from tools import pull, generate_permutation, get_inverse, run_experiment1
 
-from ucb_ds import DataOwner, User, R_node, ArmSelector
+from ucb_ds import DataOwner, DataClient, R_node, ArmSelector
 
 
 ########## class R_node2
 class R_node2(R_node):
 	# Initialize arm node i, who has variables s_i, n_i, and t needed to compute B_i later on
-	def __init__(self, K, i, pk_U, key, key_AS_Ri):
+	def __init__(self, K, i, pk_DC, key, key_AS_Ri):
 		self.time = 0
 		t = time.time()
 		self.i = i
 		self.s_i = 0
 		self.n_i = 0
 		self.t = K-1
-		self.pk_U = pk_U # the pk of User is needed to send ecrypted sum of rewards at the end
+		self.pk_DC = pk_DC # the pk of DataClient is needed to send ecrypted sum of rewards at the end
 		self.key = key # shared key with AS, DO, and other R_i
 		self.key_AS_Ri = key_AS_Ri # shared only with AS
 		self.time += time.time() - t
@@ -151,20 +151,20 @@ def UCB_DS2(N, K, mu):
 	for i in range(1, K+1):
 		keys_AS_Ri[i] = get_random_bytes(32)
 
-	U = User(N) # we create User here because her pk is needed to initialize each arm node
+	DC = DataClient(N) # we create DataClient here because her pk is needed to initialize each arm node
 
 	# step 0
 	DO = DataOwner(K, mu, key)
 	R_nodes = dict()
 	for i in range (1, K+1):
-		R_nodes[i] = R_node2(K, i, U.pk, key, keys_AS_Ri[i])
+		R_nodes[i] = R_node2(K, i, DC.pk, key, keys_AS_Ri[i])
 		data_DO_Ri = DO.outsource_arm(i)
 		R_nodes[i].receive_outsourced_mu(data_DO_Ri)
 
 	# step 1
 	AS = ArmSelector2(K, key, keys_AS_Ri)
-	data_U_AS = U.send_budget(AS)
-	AS.receive_budget(data_U_AS)
+	data_DC_AS = DC.send_budget(AS)
+	AS.receive_budget(data_DC_AS)
 
 	# make nodes know each other
 	AS.R_nodes = R_nodes
@@ -178,19 +178,19 @@ def UCB_DS2(N, K, mu):
 		
 	# steps 5, 6
 	R = AS.compute_cumulative_reward()
-	U.receive_R(R)
+	DC.receive_R(R)
 	
 	# construct and return result
 	result = dict()
-	result["R"] = U.R
+	result["R"] = DC.R
 	result["time"] = time.time() - t_start
 
 	result["time DO"] = DO.time
-	result["time U"] = U.time
+	result["time DC"] = DC.time
 	result["time AS"] = AS.time
 
 	check_time = 0
-	check_time += DO.time + U.time + AS.time
+	check_time += DO.time + DC.time + AS.time
 
 	for i in range(1, K+1):
 		result["time R" + str(i)] = R_nodes[i].time
