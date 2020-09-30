@@ -1,4 +1,13 @@
-This is the code used for the experimental study reported in the paper *Secure Outsourcing of Multi-Armed Bandits*.
+This is the code used for the experimental study reported in the paper 
+
+
+    @inproceedings{CLLS20,
+      author    = {Ciucanu, R. and Lafourcade, P. and {Lombard-Platet}, M. and Soare, M.},
+      title     = {{Secure Outsourcing of Multi-Armed Bandits}},
+      booktitle = {IEEE International Conference on Trust, Security and Privacy in Computing and Communications (TrustCom)},
+      year      = {2020},
+      pages     = {Accepted. To appear.}
+    }
 
 We have done our implementation in Python 3 on Ubuntu.
 We provide a detailed description of the experimental setup and results in Section 4 of our paper.
