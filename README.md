@@ -6,7 +6,7 @@ This is the code used for the experimental study reported in the paper
       title     = {{Secure Outsourcing of Multi-Armed Bandits}},
       booktitle = {IEEE International Conference on Trust, Security and Privacy in Computing and Communications (TrustCom)},
       year      = {2020},
-      pages     = {Accepted. To appear.}
+      pages     = {202--209}
     }
 
 We have done our implementation in Python 3 on Ubuntu.
