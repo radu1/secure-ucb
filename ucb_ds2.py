@@ -5,12 +5,12 @@ import json
 from math import sqrt, log
 
 from phe import paillier
-from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 sys.path.append(os.path.relpath("."))
-from tools import pull, generate_permutation, get_inverse, run_experiment1, aes_mode
+from tools import pull, generate_permutation, get_inverse, run_experiment1
 
 from ucb_ds import DataOwner, DataClient, R_node, ArmSelector
 
@@ -27,58 +27,44 @@ class R_node2(R_node):
 		self.t = K-1
 		self.pk_DC = pk_DC # the pk of DataClient is needed to send ecrypted sum of rewards at the end
 		self.key = key # shared key with AS, DO, and other R_i
+		self.aesgcm = AESGCM(self.key)
 		self.key_AS_Ri = key_AS_Ri # shared only with AS
-		self.time += time.time() - t
-
-	# Step 2: Arm node i receives a triple of ciphertexts (b, first, node), is pulled if b=1, then updates its variables
-	def receive_AS(self, triple_and_iv):
-		t = time.time()
-		ciphertext_b, ciphertext_first, ciphertext_next, iv, self.iv_i_m = triple_and_iv
-		cipher = AES.new(self.key, aes_mode, iv)
-		self.b = int(unpad(cipher.decrypt(ciphertext_b), AES.block_size))
-		self.first = int(unpad(cipher.decrypt(ciphertext_first), AES.block_size))
-		self.next = int(unpad(cipher.decrypt(ciphertext_next), AES.block_size))
-		self.t += 1
-		if self.b == 1:
-			r = pull(self.mu_i)
-			self.s_i += r
-			self.n_i += 1
-		self.B_i = 1. * self.s_i / self.n_i + sqrt(2. * log(self.t) / self.n_i)
+		self.aesgcm2 = AESGCM(self.key_AS_Ri)
 		self.time += time.time() - t
 
 	# Step 3: Start ring computation
 	def start_ring(self):
 		t = time.time()
-		iv = get_random_bytes(16)
-		cipher1 = AES.new(self.key, aes_mode, iv)
-		cipher2 = AES.new(self.key_AS_Ri, aes_mode, self.iv_i_m)
-		ciphertext_i_m1 = cipher2.encrypt(pad(str(self.i).encode('utf-8'), AES.block_size))
-		ciphertext_i_m2 = cipher1.encrypt(pad(ciphertext_i_m1, AES.block_size))
-		ciphertext_B_m = cipher1.encrypt(pad(str(self.B_i).encode('utf-8'), AES.block_size))	
+		nonce1 = os.urandom(12)
+		nonce2 = os.urandom(12)
+		nonce3 = os.urandom(12)
+		ciphertext_i_m1 = self.aesgcm2.encrypt(nonce1, str(self.i).encode('utf-8'), None)
+		ciphertext_i_m2 = self.aesgcm.encrypt(nonce2, ciphertext_i_m1, None)
+		ciphertext_B_m = self.aesgcm.encrypt(nonce3, str(self.B_i).encode('utf-8'), None)
 		self.time += time.time() - t
-		self.R_nodes[self.next].receive_Ri((ciphertext_B_m, ciphertext_i_m2, iv))
+		self.R_nodes[self.next].receive_Ri((ciphertext_B_m, ciphertext_i_m2, nonce1, nonce2, nonce3))
 
 	# Step 3/4: Arm node i receives pair (B_m, i_m), updates variables, and sends either to next arm node or to AS
-	def receive_Ri(self, pair_and_iv):
+	def receive_Ri(self, pair_and_nonces):
 		t = time.time()
-		ciphertext_B_m, ciphertext_i_m, iv = pair_and_iv
-		cipher = AES.new(self.key, aes_mode, iv)
-		ciphertext_i_m2 = unpad(cipher.decrypt(ciphertext_i_m), AES.block_size)
-		B_m = float(unpad(cipher.decrypt(ciphertext_B_m), AES.block_size))
+		ciphertext_B_m, ciphertext_i_m2, nonce1, nonce2, nonce3 = pair_and_nonces
+
+		ciphertext_i_m1 = self.aesgcm.decrypt(nonce2, ciphertext_i_m2, None)
+		B_m = float(self.aesgcm.decrypt(nonce3, ciphertext_B_m, None))
 		if self.B_i > B_m:
 			B_m = self.B_i
-			cipher_i_m = AES.new(self.key_AS_Ri, aes_mode, self.iv_i_m)
-			ciphertext_i_m2 = cipher_i_m.encrypt(pad(str(self.i).encode('utf-8'), AES.block_size))
-		iv = get_random_bytes(16)
-		cipher = AES.new(self.key, aes_mode, iv)
-		ciphertext_i_m = cipher.encrypt(pad(ciphertext_i_m2, AES.block_size))
+			nonce1 = os.urandom(12)
+			ciphertext_i_m1 = self.aesgcm2.encrypt(nonce1, str(self.i).encode('utf-8'), None)
+		nonce2 = os.urandom(12)
+		ciphertext_i_m2 = self.aesgcm.encrypt(nonce2, ciphertext_i_m1, None)
 		if self.next != 0:
-			ciphertext_B_m = cipher.encrypt(pad(str(B_m).encode('utf-8'), AES.block_size))
+			nonce3 = os.urandom(12)
+			ciphertext_B_m = self.aesgcm.encrypt(nonce3, str(B_m).encode('utf-8'), None)
 		self.time += time.time() - t
 		if self.next != 0:
-			self.R_nodes[self.next].receive_Ri((ciphertext_B_m, ciphertext_i_m, iv))
+			self.R_nodes[self.next].receive_Ri((ciphertext_B_m, ciphertext_i_m2, nonce1, nonce2, nonce3))
 		else:
-			self.AS.receive_Ri((ciphertext_i_m, iv))
+			self.AS.receive_Ri((ciphertext_i_m2, nonce1, nonce2))
 
 
 
@@ -91,7 +77,11 @@ class ArmSelector2(ArmSelector):
 		self.K = K
 		self.i_m = 0 # index of arm to be pulled next, is updated during the Exploration-exploitation phase
 		self.key = key # shared key with DO, R_i
+		self.aesgcm = AESGCM(self.key)
 		self.keys_AS_Ri = keys_AS_Ri # list of keys, each of them shared with a single R_i
+		self.aesgcm2 = dict()
+		for i in range(1, self.K+1):
+			self.aesgcm2[i] = AESGCM(self.keys_AS_Ri[i])
 		self.time += time.time() - t
 
 
@@ -100,20 +90,19 @@ class ArmSelector2(ArmSelector):
 		t = time.time()
 		self.sigma = generate_permutation(self.K)
 		self.time += time.time() - t
-		self.iv_i_m = dict()
 		for i in range(1, self.K+1):
 			t = time.time()
 			b = 1 if (self.i_m == 0 or self.i_m == i) else 0
 			first = 1 if (self.sigma[i] == 1) else 0
 			next = 0 if (self.sigma[i] == self.K) else get_inverse(self.sigma, self.sigma[i]+1)
-			iv = get_random_bytes(16)
-			cipher = AES.new(self.key, aes_mode, iv)
-			ciphertext_b = cipher.encrypt(pad(str(b).encode('utf-8'), AES.block_size))
-			ciphertext_first = cipher.encrypt(pad(str(first).encode('utf-8'), AES.block_size))
-			ciphertext_next = cipher.encrypt(pad(str(next).encode('utf-8'), AES.block_size))
-			self.iv_i_m[i] = get_random_bytes(16)
+			nonce1 = os.urandom(12)
+			nonce2 = os.urandom(12)
+			nonce3 = os.urandom(12)
+			ciphertext_b = self.aesgcm.encrypt(nonce1, str(b).encode('utf-8'), None)
+			ciphertext_first = self.aesgcm.encrypt(nonce2, str(first).encode('utf-8'), None)
+			ciphertext_next = self.aesgcm.encrypt(nonce3, str(next).encode('utf-8'), None)
 			self.time += time.time() - t
-			self.R_nodes[i].receive_AS((ciphertext_b, ciphertext_first, ciphertext_next, iv, self.iv_i_m[i]))
+			self.R_nodes[i].receive_AS((ciphertext_b, ciphertext_first, ciphertext_next, nonce1, nonce2, nonce3))
 			t = time.time()
 			if first == 1:
 				first_node = self.R_nodes[i]
@@ -122,15 +111,13 @@ class ArmSelector2(ArmSelector):
 
 
 	# Step 4: Receive the index of the arm to be pulled next
-	def receive_Ri(self, ciphertext_and_iv):
+	def receive_Ri(self, ciphertext_and_nonces):
 		t = time.time()
-		ciphertext_i_m, iv = ciphertext_and_iv
-		cipher = AES.new(self.key, aes_mode, iv)
-		ciphertext_i_m2 = unpad(cipher.decrypt(ciphertext_i_m), AES.block_size)
+		ciphertext_i_m2, nonce1, nonce2 = ciphertext_and_nonces
+		ciphertext_i_m1 = self.aesgcm.decrypt(nonce2, ciphertext_i_m2, None)
 		for i in range(1, self.K+1):	
-			cipher2 = AES.new(self.keys_AS_Ri[i], aes_mode, self.iv_i_m[i])
 			try:
-				self.i_m = int(unpad(cipher2.decrypt(ciphertext_i_m2), AES.block_size).decode('utf-8'))
+				self.i_m = int(self.aesgcm2[i].decrypt(nonce1, ciphertext_i_m1, None).decode('utf-8'))
 			except:
 				continue
 			if 1 <= self.i_m and self.i_m <= self.K:

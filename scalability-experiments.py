@@ -5,14 +5,14 @@ from tools import parse_json_output, check_results, plot_lines_and_pie
 import warnings
 warnings.simplefilter("ignore")
 
-nb_runs = 2
-algos = ["ucb_ds", "ucb_d", "ucb"] #"ucb_ds2", 
+nb_runs = 100
+algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"]
 algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
 
 
 ######### Experiment 1: Vary N for fixed K
-scenarios_experiment1 = ["2"]#["1", "2", "3", "4", "5", "6"]
-N_vals = [100, 1000]#, 10000, 100000]
+scenarios_experiment1 = ["1", "2"]#[, "3", "4", "5", "6"]
+N_vals = [100, 1000, 10000, 100000]
 DIR_EXP1_IN = "input_experiment1/"
 DIR_EXP1_OUT = "output_experiment1/"
 
