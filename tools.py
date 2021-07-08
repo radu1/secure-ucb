@@ -3,8 +3,12 @@ import sys
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+
 from matplotlib import cm
 rng = np.random.RandomState(100)
+
+from Crypto.Cipher import AES
+aes_mode = AES.MODE_GCM
 
 
 # Function that returns a random number (0 or 1) according to the Bernoulli probability distribution defined by p

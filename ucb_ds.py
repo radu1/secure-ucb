@@ -10,7 +10,7 @@ from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 
 sys.path.append(os.path.relpath("."))
-from tools import pull, generate_permutation, get_inverse, run_experiment1
+from tools import pull, generate_permutation, get_inverse, run_experiment1, aes_mode
 
 
 ########## class DataOwner
@@ -28,7 +28,7 @@ class DataOwner():
 	def outsource_arm(self, i):
 		t = time.time()
 		iv = get_random_bytes(16)
-		ciphertext_mu_i = AES.new(self.key, AES.MODE_CBC, iv).encrypt(pad(str(self.mu[i]).encode('utf-8'), AES.block_size))
+		ciphertext_mu_i = AES.new(self.key, aes_mode, iv).encrypt(pad(str(self.mu[i]).encode('utf-8'), AES.block_size))
 		self.time += time.time() - t
 		return (ciphertext_mu_i, iv)
 
@@ -72,14 +72,14 @@ class R_node():
 	def receive_outsourced_mu(self, data_DO_Ri):
 		t = time.time()
 		ciphertext_mu_i, iv = data_DO_Ri
-		self.mu_i = float(unpad(AES.new(self.key, AES.MODE_CBC, iv).decrypt(ciphertext_mu_i), AES.block_size))
+		self.mu_i = float(unpad(AES.new(self.key, aes_mode, iv).decrypt(ciphertext_mu_i), AES.block_size))
 		self.time += time.time() - t
 
 	# Step 2: Arm node i receives a triple of ciphertexts (b, first, node), is pulled if b=1, then updates its variables
 	def receive_AS(self, triple_and_iv):
 		t = time.time()
 		ciphertext_b, ciphertext_first, ciphertext_next, iv = triple_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		self.b = int(unpad(cipher.decrypt(ciphertext_b), AES.block_size))
 		self.first = int(unpad(cipher.decrypt(ciphertext_first), AES.block_size))
 		self.next = int(unpad(cipher.decrypt(ciphertext_next), AES.block_size))
@@ -95,7 +95,7 @@ class R_node():
 	def start_ring(self):
 		t = time.time()
 		iv = get_random_bytes(16)
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		ciphertext_B_m = cipher.encrypt(pad(str(self.B_i).encode('utf-8'), AES.block_size))
 		ciphertext_i_m = cipher.encrypt(pad(str(self.i).encode('utf-8'), AES.block_size))
 		self.time += time.time() - t
@@ -105,14 +105,14 @@ class R_node():
 	def receive_Ri(self, pair_and_iv):
 		t = time.time()
 		ciphertext_B_m, ciphertext_i_m, iv = pair_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		B_m = float(unpad(cipher.decrypt(ciphertext_B_m), AES.block_size))
 		i_m = int(unpad(cipher.decrypt(ciphertext_i_m), AES.block_size))
 		if self.B_i > B_m:
 			B_m = self.B_i
 			i_m = self.i
 		iv = get_random_bytes(16)
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		if self.next != 0:
 			ciphertext_B_m = cipher.encrypt(pad(str(B_m).encode('utf-8'), AES.block_size))
 		ciphertext_i_m = cipher.encrypt(pad(str(i_m).encode('utf-8'), AES.block_size))
@@ -159,7 +159,7 @@ class ArmSelector():
 			first = 1 if (self.sigma[i] == 1) else 0
 			next = 0 if (self.sigma[i] == self.K) else get_inverse(self.sigma, self.sigma[i]+1)
 			iv = get_random_bytes(16)
-			cipher = AES.new(self.key, AES.MODE_CBC, iv)
+			cipher = AES.new(self.key, aes_mode, iv)
 			ciphertext_b = cipher.encrypt(pad(str(b).encode('utf-8'), AES.block_size))
 			ciphertext_first = cipher.encrypt(pad(str(first).encode('utf-8'), AES.block_size))
 			ciphertext_next = cipher.encrypt(pad(str(next).encode('utf-8'), AES.block_size))
@@ -175,7 +175,7 @@ class ArmSelector():
 	def receive_Ri(self, ciphertext_and_iv):
 		t = time.time()
 		ciphertext_i_m, iv = ciphertext_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		self.i_m = int(unpad(cipher.decrypt(ciphertext_i_m), AES.block_size))
 		self.time += time.time() - t
 

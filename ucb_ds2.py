@@ -10,7 +10,7 @@ from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 
 sys.path.append(os.path.relpath("."))
-from tools import pull, generate_permutation, get_inverse, run_experiment1
+from tools import pull, generate_permutation, get_inverse, run_experiment1, aes_mode
 
 from ucb_ds import DataOwner, DataClient, R_node, ArmSelector
 
@@ -34,7 +34,7 @@ class R_node2(R_node):
 	def receive_AS(self, triple_and_iv):
 		t = time.time()
 		ciphertext_b, ciphertext_first, ciphertext_next, iv, self.iv_i_m = triple_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		self.b = int(unpad(cipher.decrypt(ciphertext_b), AES.block_size))
 		self.first = int(unpad(cipher.decrypt(ciphertext_first), AES.block_size))
 		self.next = int(unpad(cipher.decrypt(ciphertext_next), AES.block_size))
@@ -50,8 +50,8 @@ class R_node2(R_node):
 	def start_ring(self):
 		t = time.time()
 		iv = get_random_bytes(16)
-		cipher1 = AES.new(self.key, AES.MODE_CBC, iv)
-		cipher2 = AES.new(self.key_AS_Ri, AES.MODE_CBC, self.iv_i_m)
+		cipher1 = AES.new(self.key, aes_mode, iv)
+		cipher2 = AES.new(self.key_AS_Ri, aes_mode, self.iv_i_m)
 		ciphertext_i_m1 = cipher2.encrypt(pad(str(self.i).encode('utf-8'), AES.block_size))
 		ciphertext_i_m2 = cipher1.encrypt(pad(ciphertext_i_m1, AES.block_size))
 		ciphertext_B_m = cipher1.encrypt(pad(str(self.B_i).encode('utf-8'), AES.block_size))	
@@ -62,15 +62,15 @@ class R_node2(R_node):
 	def receive_Ri(self, pair_and_iv):
 		t = time.time()
 		ciphertext_B_m, ciphertext_i_m, iv = pair_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		ciphertext_i_m2 = unpad(cipher.decrypt(ciphertext_i_m), AES.block_size)
 		B_m = float(unpad(cipher.decrypt(ciphertext_B_m), AES.block_size))
 		if self.B_i > B_m:
 			B_m = self.B_i
-			cipher_i_m = AES.new(self.key_AS_Ri, AES.MODE_CBC, self.iv_i_m)
+			cipher_i_m = AES.new(self.key_AS_Ri, aes_mode, self.iv_i_m)
 			ciphertext_i_m2 = cipher_i_m.encrypt(pad(str(self.i).encode('utf-8'), AES.block_size))
 		iv = get_random_bytes(16)
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		ciphertext_i_m = cipher.encrypt(pad(ciphertext_i_m2, AES.block_size))
 		if self.next != 0:
 			ciphertext_B_m = cipher.encrypt(pad(str(B_m).encode('utf-8'), AES.block_size))
@@ -107,7 +107,7 @@ class ArmSelector2(ArmSelector):
 			first = 1 if (self.sigma[i] == 1) else 0
 			next = 0 if (self.sigma[i] == self.K) else get_inverse(self.sigma, self.sigma[i]+1)
 			iv = get_random_bytes(16)
-			cipher = AES.new(self.key, AES.MODE_CBC, iv)
+			cipher = AES.new(self.key, aes_mode, iv)
 			ciphertext_b = cipher.encrypt(pad(str(b).encode('utf-8'), AES.block_size))
 			ciphertext_first = cipher.encrypt(pad(str(first).encode('utf-8'), AES.block_size))
 			ciphertext_next = cipher.encrypt(pad(str(next).encode('utf-8'), AES.block_size))
@@ -125,10 +125,10 @@ class ArmSelector2(ArmSelector):
 	def receive_Ri(self, ciphertext_and_iv):
 		t = time.time()
 		ciphertext_i_m, iv = ciphertext_and_iv
-		cipher = AES.new(self.key, AES.MODE_CBC, iv)
+		cipher = AES.new(self.key, aes_mode, iv)
 		ciphertext_i_m2 = unpad(cipher.decrypt(ciphertext_i_m), AES.block_size)
 		for i in range(1, self.K+1):	
-			cipher2 = AES.new(self.keys_AS_Ri[i], AES.MODE_CBC, self.iv_i_m[i])
+			cipher2 = AES.new(self.keys_AS_Ri[i], aes_mode, self.iv_i_m[i])
 			try:
 				self.i_m = int(unpad(cipher2.decrypt(ciphertext_i_m2), AES.block_size).decode('utf-8'))
 			except:
