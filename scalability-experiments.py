@@ -11,7 +11,7 @@ algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
 
 
 ######### Experiment 1: Vary N for fixed K
-scenarios_experiment1 = ["1", "2"]#[, "3", "4", "5", "6"]
+scenarios_experiment1 = ["2"]#["1", , "3", "4", "5", "6"]
 N_vals = [100, 1000, 10000, 100000]
 DIR_EXP1_IN = "input_experiment1/"
 DIR_EXP1_OUT = "output_experiment1/"

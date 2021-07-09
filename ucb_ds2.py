@@ -6,7 +6,6 @@ from math import sqrt, log
 
 from phe import paillier
 from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 sys.path.append(os.path.relpath("."))
