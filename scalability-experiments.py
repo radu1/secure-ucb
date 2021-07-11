@@ -11,7 +11,7 @@ algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
 
 
 ######### Experiment 1: Vary N for fixed K
-scenarios_experiment1 = ["1", "2", "3", "4", "5", "6"]
+'''scenarios_experiment1 = ["1", "2", "3", "4", "5", "6"]
 N_vals = [100, 1000, 10000, 100000]
 DIR_EXP1_IN = "input_experiment1/"
 DIR_EXP1_OUT = "output_experiment1/"
@@ -33,11 +33,11 @@ for scenario in scenarios_experiment1:
 		# check that all algorithms give the same cumulative reward
 		check_results(R_list, algos)
 	# generate plot
-	plot_lines_and_pie(scenario, algos, algos_names, "Budget N", True, N_vals, aggregates_time, aggregates_all, "N=" + str(N), DIR_EXP1_OUT)
+	plot_lines_and_pie(scenario, algos, algos_names, "Budget N", True, N_vals, aggregates_time, aggregates_all, "N=" + str(N), DIR_EXP1_OUT)'''
 
 
 ######### Experiment 2: Vary K for fixed N
-'''K_vals = [5, 10, 15, 20]
+K_vals = [5, 10, 15, 20]
 N = 100000
 DIR_EXP2 = "experiment2/"
 os.system("mkdir -p " + DIR_EXP2)
@@ -62,4 +62,4 @@ for K in K_vals:
 	# check that all algorithms give the same cumulative reward
 	check_results(R_list, algos)
 # generate plot
-plot_lines_and_pie("_vary_K_", algos, algos_names, "Number of arms K", False, K_vals, aggregates_time, aggregates_all, "K=" + str(K), DIR_EXP2)'''
+plot_lines_and_pie("_vary_K_", algos, algos_names, "Number of arms K", False, K_vals, aggregates_time, aggregates_all, "K=" + str(K), DIR_EXP2)
