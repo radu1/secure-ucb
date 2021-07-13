@@ -8,7 +8,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 nb_runs = 100
-algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"] 
+algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"]
 algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
 
 scenarios = ["Jester-small", "Jester-large", "MovieLens"]
