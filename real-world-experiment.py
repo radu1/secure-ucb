@@ -7,7 +7,7 @@ from tools import parse_json_output, check_results
 import warnings
 warnings.simplefilter("ignore")
 
-nb_runs = 100
+nb_runs = 3
 algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"]
 algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
 
