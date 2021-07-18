@@ -130,6 +130,7 @@ def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, lef
     if left_xlog:
         plt.xscale('log')
         components = list(map (lambda x: x[5:], components)) # remove "time " from the left of each key
+        components[0] = "AC" # AS is called AC in the last version of the paper
     else:
         plt.xticks(left_x, left_x)
         components = list(map (lambda x: '', components))
