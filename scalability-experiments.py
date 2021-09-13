@@ -7,7 +7,7 @@ warnings.simplefilter("ignore")
 
 nb_runs = 100
 algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"]
-algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
+algos_names = ["UCB-MS2", "UCB-MS", "UCB-M", "UCB"] # "Distributed" becomes "Multi-party"
 
 
 ######### Experiment 1: Vary N for fixed K

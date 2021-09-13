@@ -9,7 +9,7 @@ warnings.simplefilter("ignore")
 
 nb_runs = 3
 algos = ["ucb_ds2", "ucb_ds", "ucb_d", "ucb"]
-algos_names = ["UCB-DS2", "UCB-DS", "UCB-D", "UCB"]
+algos_names = ["UCB-MS2", "UCB-MS", "UCB-M", "UCB"] # "Distributed" becomes "Multi-party"
 
 scenarios = ["Jester-small", "Jester-large", "MovieLens"]
 DIR_OUT = "real-world-data-output/"

@@ -141,7 +141,7 @@ def plot_lines_and_pie(scenario, algos, algos_names, left_xlabel, left_xlog, lef
 
     # right : pie chart only for some point
     plt.subplot(144)    
-    plt.title("Zoom on UCB-DS for " + right_message)
+    plt.title("Zoom on UCB-MS for " + right_message)
 
     cm = plt.get_cmap('gist_rainbow')
     NUM_COLORS = len(components) + 1
