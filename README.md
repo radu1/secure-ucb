@@ -1,4 +1,10 @@
-This is the code used for the experimental study reported in the paper [https://ieeexplore.ieee.org/document/9343228](https://ieeexplore.ieee.org/document/9343228)
+This is the code used for the experiments from our papers:
+
++ Conference version: [Secure Outsourcing of Multi-Armed Bandits](https://ieeexplore.ieee.org/document/9343228)
+
++ Journal version: [Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits](https://lig-membres.imag.fr/ciucanu/preprints/CLLS22.pdf)
+
+If you use our code, please cite:
 
 
     @inproceedings{CLLS20,
@@ -8,6 +14,14 @@ This is the code used for the experimental study reported in the paper [https://
       year      = {2020},
       pages     = {202--209}
     }
+    
+    @article{CLLS22,
+      author    = {Ciucanu, R. and Lafourcade, P. and {Lombard-Platet}, M. and Soare, M.},
+      title     = {{Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits}},
+      journal   = {Journal of Computer Security (JCS)},
+      year      = {2022},
+      note      = {Accepted (to appear)}
+}
 
 We have done our implementation in Python 3 on Ubuntu.
 We provide a detailed description of the experimental setup and results in Section 4 of our paper.
