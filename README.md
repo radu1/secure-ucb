@@ -2,7 +2,7 @@ This is the code used for the experiments from our papers:
 
 + Conference version: [Secure Outsourcing of Multi-Armed Bandits](https://ieeexplore.ieee.org/document/9343228)
 
-+ Journal version: [Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits](https://lig-membres.imag.fr/ciucanu/preprints/CLLS22.pdf)
++ Journal version: [Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits](https://content.iospress.com/articles/journal-of-computer-security/jcs210051)
 
 If you use our code, please cite:
 
