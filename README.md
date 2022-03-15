@@ -20,8 +20,8 @@ If you use our code, please cite:
       title     = {{Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits}},
       journal   = {Journal of Computer Security (JCS)},
       year      = {2022},
-      note      = {Accepted (to appear)}
-}
+      note      = {Accepted, to appear}
+    }
 
 We have done our implementation in Python 3 on Ubuntu.
 We provide a detailed description of the experimental setup and results in Section 4 of our paper.
