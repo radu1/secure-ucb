@@ -15,12 +15,14 @@ If you use our code, please cite:
       pages     = {202--209}
     }
     
-    @article{CLLS22,
+    @article{CLLS23,
       author    = {Ciucanu, R. and Lafourcade, P. and {Lombard-Platet}, M. and Soare, M.},
       title     = {{Secure Protocols for Cumulative Reward Maximization in Stochastic Multi-Armed Bandits}},
       journal   = {Journal of Computer Security (JCS)},
-      year      = {2022},
-      note      = {Accepted, to appear}
+      volume    = {31},
+      number    = {1},
+      pages     = {1--27},
+      year      = {2023}
     }
 
 We have done our implementation in Python 3 on Ubuntu.
